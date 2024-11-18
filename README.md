@@ -2,18 +2,28 @@
 
 A Simple PowerShell Script that once ran will prevent windows update from every rebooting your PC again automatically.
 
-# How to install
+## How to install
 
+### Option 1:
 1. Download the script
-2. Run the script with administrator privileges
-3. Give Windows Update the finger, you have finally defeated it.
+2. Right click the script and select "Run with Powershell"
+3. When prompted, click "Yes" to run the script with administrator privileges
+4. Give Windows Update the finger, you have finally defeated it.
 
-# How does it work?
+### Option 2:
+1. Download the script
+2. Open a PowerShell window with administrator privileges
+3. Navigate to the directory where the script is located
+4. Run the script with the following command: `powershell -ExecutionPolicy Bypass -File FWindowsUpdateReboot.ps1`
+5. Give Windows Update the finger, you have finally defeated it.
+
+## How does it get around Windows Update restarting your PC?
 
 Windows Update forces you to reboot your PC to install updates, however it won't do so if the current time is within your Active Hours.
 You are limited to 18 hours for Active Hours, and if you are outside of that, you will be rebooted.
+The script works by to permanently prevent Windows Update from restarting your PC by continuously rotating your Windows Active Hours every hour so you're never outside of Active Hours.
 
-The script works by to permanently prevent Windows Update from restarting your PC by continuously rotating your Windows Active Hours every hour so you're never outside of Active Hours. Here's how:
+## What is the script doing?
 
 1. If not run with administrator privileges, the script will request elevation to run as administrator.
 2. The script will then:
