@@ -45,3 +45,14 @@ For example, if you're using your PC at 2 PM:
 
 The script requires a one-time setup with administrator privileges, but then runs automatically as a system service requiring no further interaction.
 
+## ⚠️ Security Reminder
+
+Before running any PowerShell script downloaded from the internet (including this one), you should always review its contents to ensure it's safe. While this script is open source and safe to use, it's good security practice to verify scripts before executing them with administrator privileges. 
+
+The full source code is available in this repository for transparency and security verification.
+
+Review the script source code to ensure it's safe:
+
+https://github.com/cboileau/FWindowsUpdateReboot/blob/4eeee1f0e29e3bad1fd22c02dbe23ad78f456141/FWindowsUpdateReboot.ps1#L1-L153
+
+
