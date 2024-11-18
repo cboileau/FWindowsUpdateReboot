@@ -17,6 +17,11 @@ A Simple PowerShell Script that once ran will prevent windows update from every 
 4. Run the script with the following command: `powershell -ExecutionPolicy Bypass -File FWindowsUpdateReboot.ps1`
 5. Give Windows Update the finger, you have finally defeated it.
 
+## How to uninstall
+
+1. Open a PowerShell window with administrator privileges
+2. Run the following command: `FWindowsUpdateReboot -Uninstall`
+
 ## How does it get around Windows Update restarting your PC?
 
 Windows Update forces you to reboot your PC to install updates, however it won't do so if the current time is within your Active Hours.

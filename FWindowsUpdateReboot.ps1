@@ -33,12 +33,11 @@ $sourceScriptPath = $MyInvocation.MyCommand.Path
 if ($Uninstall) {
     # Remove the scheduled task if it exists
     try {
-        Get-ScheduledTask -TaskName $taskName -ErrorAction Stop
+        $task = Get-ScheduledTask -TaskName $taskName -ErrorAction Stop
         Unregister-ScheduledTask -TaskName $taskName -Confirm:$false
         Write-Host "Scheduled task '$taskName' has been removed."
     } catch {
-        Write-Host "Error removing scheduled task: $_"
-        Write-Host "Scheduled task '$taskName' does not exist."
+        Write-Host "Scheduled task '$taskName' does not exist. (Skipping)"
     }
 
     # Prompt user about script removal
@@ -48,10 +47,10 @@ if ($Uninstall) {
             Remove-Item -Path $destinationPath -Force
             Write-Host "Script removed from System32."
         } else {
-            Write-Host "Script not found in System32."
+            Write-Host "Script not found in System32. (Skipping)"
         }
     }
-    Write-Host "Successfully uninstalled $taskName. Press Enter to exit..."
+    Write-Host "Successfully uninstalled $taskName.`nPress Enter to exit..."
     $null = Read-Host
     exit
 }
@@ -72,6 +71,7 @@ if ($Rotate) {
 
     Write-Host "Active hours updated: Start=$newActiveHoursStart, End=$newActiveHoursEnd"
 } else {
+    # Install the script
     # Copy the script to System32 if it's not already there
     if ($sourceScriptPath -ieq $destinationPath) {
         Write-Host "Script is already in System32."
