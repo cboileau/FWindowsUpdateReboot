@@ -1,2 +1,37 @@
 # FWindowsUpdateReboot
+
 A Simple PowerShell Script that once ran will prevent windows update from every rebooting your PC again automatically.
+
+# How to install
+
+1. Download the script
+2. Run the script with administrator privileges
+3. Give Windows Update the finger, you have finally defeated it.
+
+# How does it work?
+
+Windows Update forces you to reboot your PC to install updates, however it won't do so if the current time is within your Active Hours.
+You are limited to 18 hours for Active Hours, and if you are outside of that, you will be rebooted.
+
+The script works by to permanently prevent Windows Update from restarting your PC by continuously rotating your Windows Active Hours every hour so you're never outside of Active Hours. Here's how:
+
+1. If not run with administrator privileges, the script will request elevation to run as administrator.
+2. The script will then:
+   - Copy itself to the Windows System32 directory
+   - Create a scheduled task called "FWindowsUpdateReboot" that runs every hour
+3. The scheduled task runs the script with the -Rotate parameter, which:
+   - Sets Active Hours to start at the current hour
+   - Sets Active Hours to end 18 hours later (the maximum allowed duration)
+   - Updates these settings in the Windows registry
+
+By dynamically adjusting Active Hours every hour, you are never outside of Active Hours, and Windows Update will never find a suitable time outside of Active Hours to restart your computer.
+
+The script runs silently in the background using minimal resources.
+
+For example, if you're using your PC at 2 PM:
+- Active Hours will be set to 2 PM - 8 AM
+- An hour later at 3 PM, they'll adjust to 3 PM - 9 AM
+- This continues as long as your PC is running
+
+The script requires a one-time setup with administrator privileges, but then runs automatically as a system service requiring no further interaction.
+
