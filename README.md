@@ -60,4 +60,66 @@ Review the script source code to ensure it's safe:
 
 https://github.com/cboileau/FWindowsUpdateReboot/blob/4eeee1f0e29e3bad1fd22c02dbe23ad78f456141/FWindowsUpdateReboot.ps1#L1-L153
 
+## Testing
+
+The project includes unit tests written using Pester, the standard testing framework for PowerShell. Tests can be run locally or through GitHub Actions CI pipeline.
+
+### Running Tests Locally
+
+#### Option 1: Using the Test Runner Script (Recommended)
+
+1. Clone the repository:
+```powershell
+git clone https://github.com/cboileau/FWindowsUpdateReboot.git
+cd FWindowsUpdateReboot
+```
+
+You can also run specific test categories from PowerShell:
+```powershell
+# Run all tests
+.\Run-Tests.ps1 -TestType All
+
+# Run only installation tests
+.\Run-Tests.ps1 -TestType Installation
+
+# Run only active hours tests
+.\Run-Tests.ps1 -TestType ActiveHours
+
+# Run only uninstallation tests
+.\Run-Tests.ps1 -TestType Uninstallation
+```
+
+### CI/CD
+
+The project uses GitHub Actions to run tests automatically on:
+- Every push to the main branch
+- Every pull request to the main branch
+
+Test results can be viewed in the Actions tab of the repository.
+
+### Running Individual Test Cases
+
+To run specific test cases, you can use Pester's filtering:
+
+```powershell
+# Run only installation tests
+$config = New-PesterConfiguration
+$config.Filter.Tag = "Installation"
+$config.Run.Path = "Tests"
+Invoke-Pester -Configuration $config
+
+# Run only active hours tests
+$config = New-PesterConfiguration
+$config.Filter.Tag = "ActiveHours"
+$config.Run.Path = "Tests"
+Invoke-Pester -Configuration $config
+```
+
+### Troubleshooting Tests
+
+If tests fail, check:
+1. Pester is installed correctly
+2. You're in the correct directory
+3. Your PowerShell execution policy allows running scripts
+
 
