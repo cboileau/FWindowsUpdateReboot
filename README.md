@@ -1,4 +1,6 @@
 # FWindowsUpdateReboot
+![example workflow](https://github.com/cboileau/FWindowsUpdateReboot/actions/workflows/powershell-tests.yml/badge.svg)
+
 
 A Simple PowerShell Script that once ran will prevent windows update from every rebooting your PC again automatically.
 
