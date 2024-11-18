@@ -2,7 +2,8 @@
 # PowerShell script to rotate Active Hours and set up scheduled task
 
 param (
-    [switch]$Rotate
+    [switch]$Rotate,
+    [switch]$Uninstall
 )
 
 # Check if running as administrator
@@ -15,6 +16,9 @@ if (-not $isAdmin) {
     if ($Rotate) {
         $arguments += " -Rotate"
     }
+    if ($Uninstall) {
+        $arguments += " -Uninstall"
+    }
     Start-Process -FilePath "PowerShell" -Verb RunAs -ArgumentList $arguments
     exit
 }
@@ -22,9 +26,35 @@ if (-not $isAdmin) {
 # Define variables
 $taskName = "FWindowsUpdateReboot"
 $system32Path = "$env:windir\System32"
-$scriptName = "rotate-active-hours.ps1"
+$scriptName = "FWindowsUpdateReboot.ps1"
 $destinationPath = Join-Path -Path $system32Path -ChildPath $scriptName
 $sourceScriptPath = $MyInvocation.MyCommand.Path
+
+if ($Uninstall) {
+    # Remove the scheduled task if it exists
+    try {
+        Get-ScheduledTask -TaskName $taskName -ErrorAction Stop
+        Unregister-ScheduledTask -TaskName $taskName -Confirm:$false
+        Write-Host "Scheduled task '$taskName' has been removed."
+    } catch {
+        Write-Host "Error removing scheduled task: $_"
+        Write-Host "Scheduled task '$taskName' does not exist."
+    }
+
+    # Prompt user about script removal
+    $removeScript = Read-Host "Would you like to remove the script from System32? (Y/N)"
+    if ($removeScript -eq 'Y' -or $removeScript -eq 'y') {
+        if (Test-Path $destinationPath) {
+            Remove-Item -Path $destinationPath -Force
+            Write-Host "Script removed from System32."
+        } else {
+            Write-Host "Script not found in System32."
+        }
+    }
+    Write-Host "Successfully uninstalled $taskName. Press Enter to exit..."
+    $null = Read-Host
+    exit
+}
 
 if ($Rotate) {
     # Rotate Active Hours
@@ -71,22 +101,53 @@ if ($Rotate) {
     Write-Host "Creating scheduled task '$taskName'..."
 
     # Define the action to run the script from System32 with the -Rotate parameter
-    $action = New-ScheduledTaskAction -Execute "PowerShell.exe" `
-        -Argument "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$scriptName`" -Rotate"
+    $scriptPath = Join-Path $system32Path $scriptName
+    # Build the action command without inner quotes
+    $action = "powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File $scriptPath -Rotate"
 
-    # Set the trigger to run every hour indefinitely (RepetitionDuration set to maximum value)
-    $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date) `
-        -RepetitionInterval (New-TimeSpan -Hours 1) `
-        -RepetitionDuration ([TimeSpan]::MaxValue)
+    # Enclose the entire action in double quotes for the /TR parameter
+    $actionArgument = "`"$action`""
+    # Use SchTasks.exe to create a task that runs every hour indefinitely
+    $schtasksArguments = @(
+        '/Create'
+        '/RU', 'SYSTEM'
+        '/SC', 'HOURLY'
+        '/TN', $taskName
+        '/TR', $actionArgument
+        '/F'
+    )
+    # Execute the command to create the scheduled task
+    $result = Start-Process -FilePath "schtasks.exe" -ArgumentList $schtasksArguments -Wait -PassThru -NoNewWindow
+    if ($result.ExitCode -ne 0) {
+        Write-Error "Failed to create scheduled task. Exit code: $($result.ExitCode)"
+        Write-Host "Failed to create scheduled task. See the above error message for details."
+    }
+    else {
+        Write-Host "Scheduled task '$taskName' has been created successfully."
+        Write-Host "$taskName has been installed successfully."
+        Write-Host "Give Windows Update the finger, you have finally defeated it."
 
-    # Create the scheduled task principal to run as SYSTEM
-    $principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
-
-    # Define the task settings
-    $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -Hidden
-
-    # Register the scheduled task
-    Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Principal $principal -Settings $settings
-
-    Write-Host "Scheduled task '$taskName' has been created successfully."
+        Write-Host "`n"
+        Write-Host "         / \"
+        Write-Host "        |\_/|"
+        Write-Host "        |---|"
+        Write-Host "        |   |" 
+        Write-Host "        |   |"
+        Write-Host "      _ |=-=| _"
+        Write-Host "  _  / \|   |/ \"
+        Write-Host " / \|   |   |   ||\"
+        Write-Host "|   |   |   |   | \>"
+        Write-Host "|   |   |   |   |   \"
+        Write-Host "| -   -   -   - |)   )"
+        Write-Host "|                   /"
+        Write-Host " \                 /"
+        Write-Host "  \               /"
+        Write-Host "   \             /"
+        Write-Host "    \           /"
+        Write-Host "F Windows Update Reboot!"
+        Write-Host "`n"
+    }
+    Write-Host "Press Enter to exit..."
+    $null = Read-Host
+    exit
 }
